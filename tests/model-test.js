@@ -27,28 +27,32 @@ describe('ModelTest', () => {
 	});
 
 	const mockModel = (fileName, modelClass) => {
-		sinon.stub(fs, 'readdirSync')
-			.returns([fileName]);
+		sinon.stub(fs.promises, 'readdir')
+			.resolves([fileName]);
 
 		mockRequire(path.join(ModelHelper.path, fileName), modelClass);
 	};
 
 	context('When validating a valid model', () => {
 
-		it('Should not throw', () => {
+		it('Should not throw', async () => {
+
 			mockModel('valid-model.js', ValidModel);
-			assert.doesNotThrow(modelTest);
+
+			await assert.doesNotReject(() => modelTest());
 		});
 
 	});
 
 	context('When invalid models were found', () => {
 
-		it('Should throw when the table is wrong', () => {
+		it.only('Should throw when the table is wrong', async () => {
+
 			mockModel('invalid-table-model.js', InvalidTableModel);
-			assert.throws(() => {
-				modelTest();
-			}, {
+
+			await modelTest();
+
+			await assert.rejects(() => modelTest(), {
 				code: 'ERR_ASSERTION'
 			});
 		});
@@ -57,12 +61,12 @@ describe('ModelTest', () => {
 
 	context('When no models were found', () => {
 
-		it('Should not throw', () => {
+		it('Should not throw', async () => {
 
 			sinon.stub(fs, 'readdirSync')
 				.returns([]);
 
-			assert.doesNotThrow(modelTest);
+			assert.doesNotReject(modelTest);
 		});
 	});
 
