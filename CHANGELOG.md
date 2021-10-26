@@ -7,9 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.1.0] - 2021-10-25
+## [1.0.0] - 2021-10-26
 ### Added
-- ModelTest - Testing indexes getter
-- ModelTest - Testing fields getter
-- ModelTest - Testing table getter
-- ModelTest - Testing databaseKey getter
+- Automated Tests `databaseKey`, `table`, `statuses`, `indexes`, `fields`, `shouldCreateLogs`, `excludeFieldsInLog`

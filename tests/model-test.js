@@ -7,21 +7,21 @@ const path = require('path');
 const mockRequire = require('mock-require');
 
 const sinon = require('sinon');
+
+const Model = require('@janiscommerce/model');
+
 const ModelHelper = require('../lib/model-helper');
 
 const modelTest = require('../lib/model-test');
-
-const ValidModel = require('./models/valid');
-const InvalidTableModel = require('./models/invalid-table');
-const InvalidDatabaseKeyModel = require('./models/invalid-database-key');
-const InvalidFieldsModel = require('./models/invalid-fields');
-const InvalidIndexesModel = require('./models/invalid-indexes');
 
 require('lllog')('none');
 
 describe('ModelTest', () => {
 
+	const oldEnv = { ...process.env };
+
 	afterEach(() => {
+		process.env = oldEnv;
 		sinon.restore();
 		mockRequire.stopAll();
 	});
@@ -35,38 +35,199 @@ describe('ModelTest', () => {
 
 	context('When validating a valid model', () => {
 
-		it('Should not throw', async () => {
+		it('Should not reject when valid databaseKey is defined', async () => {
+
+			class ValidModel extends Model {
+
+				get databaseKey() {
+					return 'other-database-key';
+				}
+
+				static get table() {
+					return 'valid-model-documents';
+				}
+			}
 
 			mockModel('valid-model.js', ValidModel);
 
 			await assert.doesNotReject(() => modelTest());
 		});
 
-	});
+		it('Should not reject when valid table is defined', async () => {
 
-	context('When invalid models were found', () => {
+			class ValidModel extends Model {
 
-		it.only('Should throw when the table is wrong', async () => {
+				static get table() {
+					return 'valid-model-documents';
+				}
 
-			mockModel('invalid-table-model.js', InvalidTableModel);
+				static get fields() {
+					return {
+						nameNotEqual: {
+							field: 'nameNotEqual',
+							type: 'notEqual'
+						}
+					};
+				}
 
-			await modelTest();
+				static get indexes() {
+					return [{
+						name: 'referenceId',
+						key: { referenceId: 1 },
+						unique: true
+					}, {
+						name: 'name',
+						key: { name: 1 }
+					}];
+				}
+			}
 
-			await assert.rejects(() => modelTest(), {
-				code: 'ERR_ASSERTION'
-			});
+			mockModel('valid-model.js', ValidModel);
+
+			await assert.doesNotReject(() => modelTest());
+		});
+
+		it('Should not reject when valid fields are defined', async () => {
+
+			class ValidModel extends Model {
+
+				static get table() {
+					return 'valid-model-documents';
+				}
+
+				static get fields() {
+					return {
+						nameNotEqual: {
+							field: 'nameNotEqual',
+							type: 'notEqual'
+						}
+					};
+				}
+			}
+
+			mockModel('valid-model.js', ValidModel);
+
+			await assert.doesNotReject(() => modelTest());
+		});
+
+		it('Should not reject when valid indexes are defined', async () => {
+
+			class ValidModel extends Model {
+
+				static get table() {
+					return 'valid-model-documents';
+				}
+
+				static get indexes() {
+					return [{
+						name: 'referenceId',
+						key: { referenceId: 1 },
+						unique: true
+					}, {
+						name: 'name',
+						key: { name: 1 }
+					}];
+				}
+			}
+
+			mockModel('valid-model.js', ValidModel);
+
+			await assert.doesNotReject(() => modelTest());
+		});
+
+		it('Should not reject when shouldCreateLogs is defined and returns true', async () => {
+
+			class ValidModel extends Model {
+
+				static get table() {
+					return 'valid-model-documents';
+				}
+
+				static get shouldCreateLogs() {
+					return true;
+				}
+			}
+
+			mockModel('valid-model.js', ValidModel);
+
+			await assert.doesNotReject(() => modelTest());
+		});
+
+		it('Should not reject when shouldCreateLogs is defined and returns false', async () => {
+
+			class ValidModel extends Model {
+
+				static get table() {
+					return 'valid-model-documents';
+				}
+
+				static get shouldCreateLogs() {
+					return false;
+				}
+			}
+
+			mockModel('valid-model.js', ValidModel);
+
+			await assert.doesNotReject(() => modelTest());
+		});
+
+		it('Should not reject when valid statuses are defined', async () => {
+
+			class ValidModel extends Model {
+
+				static get table() {
+					return 'valid-model-documents';
+				}
+
+				static get statuses() {
+					return {
+						success: 'success',
+						error: 'error'
+					};
+				}
+			}
+
+			mockModel('valid-model.js', ValidModel);
+
+			await assert.doesNotReject(() => modelTest());
+		});
+
+
+		it('Should find models in correct path', async () => {
+
+			process.env.MS_PATH = '';
+
+			class ValidModel extends Model {
+
+				static get table() {
+					return 'valid-model-documents';
+				}
+			}
+
+			mockModel('valid-model.js', ValidModel);
+
+			await assert.doesNotReject(() => modelTest());
+
 		});
 
 	});
 
 	context('When no models were found', () => {
 
-		it('Should not throw', async () => {
+		it('Should not reject when no model were found', async () => {
 
-			sinon.stub(fs, 'readdirSync')
-				.returns([]);
+			sinon.stub(fs.promises, 'readdir')
+				.resolves([]);
 
-			assert.doesNotReject(modelTest);
+			await assert.doesNotReject(() => modelTest());
+		});
+
+		it('Should not reject when readdir rejects', async () => {
+
+			sinon.stub(fs.promises, 'readdir')
+				.rejects(new Error('Some fs error'));
+
+			await assert.doesNotReject(() => modelTest());
 		});
 	});
 
