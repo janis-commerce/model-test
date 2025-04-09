@@ -1,3 +1,5 @@
+/* eslint-disable max-classes-per-file  */
+
 'use strict';
 
 const assert = require('assert');
@@ -192,7 +194,6 @@ describe('ModelTest', () => {
 			await assert.doesNotReject(() => modelTest());
 		});
 
-
 		it('Should find models in correct path', async () => {
 
 			process.env.MS_PATH = '';
@@ -210,6 +211,19 @@ describe('ModelTest', () => {
 
 		});
 
+		it('Should exclude model when received by parameter', async () => {
+
+			class NotModel {
+
+				someFunc(value) {
+					return value + 2;
+				}
+			}
+
+			mockModel('not-model.js', NotModel);
+
+			await assert.doesNotReject(() => modelTest({ exclude: ['not-model'] }));
+		});
 	});
 
 	context('When no models were found', () => {

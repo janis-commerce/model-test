@@ -22,6 +22,22 @@ modelTest();
 
 The package will look for the models of a service located in the `./{process.env.MS_PATH}/models/` folder.
 
+### Exclude models from testing
+
+You can exclude specific model files from being tested by passing an `exclude` array to the test function.
+
+```js
+const modelTest = require('@janiscommerce/model-test');
+
+modelTest({
+	exclude: ['model-to-skip', 'another-model']
+});
+```
+
+Each item in the array should be the filename of the model you want to skip — **do not include the** `.js` extension.
+
+> 📝 The names are matched against the model filenames located in your models folder. Matching is case-sensitive.
+
 ## Validations
 
 The package automatically will validate each model according [@janiscommerce/model](https://www.npmjs.com/package/@janiscommerce/model).

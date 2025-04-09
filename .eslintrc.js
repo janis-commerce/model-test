@@ -9,20 +9,17 @@ module.exports = {
 		mocha: true
 	},
 
-	globals: {
-		__rootpath: true,
-		coreRequire: true,
-		mainRequire: true,
-		JANIS_CORE: true,
-		JANIS_ENV: true,
-		JANIS_ENV_ALIAS: true
+	parserOptions: {
+		sourceType: 'script',
+		ecmaVersion: 2024
 	},
 
-	parserOptions: {
-		sourceType: 'script'
+	settings: {
+		'import/core-modules': ['aws-sdk', 'lodash', 'yamljs', 'openapi-schema-validator']
 	},
 
 	rules: {
+		strict: ['error', 'global'],
 		'operator-linebreak': 0,
 		'no-continue': 0,
 		'no-plusplus': 0,
@@ -32,10 +29,7 @@ module.exports = {
 		'consistent-return': 0,
 		'prefer-template': 0,
 		'import/no-unresolved': 0,
-		'import/extensions': 0,
-		'import/no-extraneous-dependencies': ['error', {
-			devDependencies: ['**/tests/**/*.js']
-		}],
+		'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/tests/**/*.js'] }],
 
 		'no-bitwise': 0,
 
@@ -113,21 +107,9 @@ module.exports = {
 		'no-await-in-loop': 0,
 
 		'object-curly-newline': ['error', {
-			ObjectExpression: {
-				minProperties: 5,
-				multiline: true,
-				consistent: true
-			},
-			ObjectPattern: {
-				minProperties: 5,
-				multiline: true,
-				consistent: true
-			}
+			ObjectExpression: { minProperties: 5, multiline: true, consistent: true },
+			ObjectPattern: { minProperties: 5, multiline: true, consistent: true }
 		}],
-		'nonblock-statement-body-position': ['error', 'below', {
-			overrides: {
-				else: 'any'
-			}
-		}]
+		'nonblock-statement-body-position': ['error', 'below', { overrides: { else: 'any' } }]
 	}
 };
